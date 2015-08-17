@@ -1,0 +1,56 @@
+<link rel="import" type="html" href="../../polymer/polymer.html">
+<link rel="import" type="html" href="../../br-select-box/src/br-select-box.html">
+<link rel="import" type="html" href="../../br-icons/src/br-icons.html">
+
+<dom-module id="br-autocomplete">
+
+  <style>
+    :host {
+      display: flex;
+      position: relative;
+      align-items: center;
+      width: 100%;
+    }
+  </style>
+
+<template>
+
+  <input type="text" placeholder="Busque por um cliente para visualizar sua carteira">
+
+  <br-select-box>
+
+    <input type="text" placeholder="Busque por um cliente para visualizar sua carteira">
+
+    <!-- <ul class="list">
+      <template is="dom-repeat" items="{{options}}">
+        <li>
+          <a href="{{item.link}}">{{item.label}}</a>
+        </li>
+      </template>
+    </ul> -->
+
+    Teste
+
+  </br-select-box>
+
+</template>
+
+<script>
+  Polymer({
+    is: 'br-autocomplete',
+
+    properties: {
+      options: {
+        type: Array,
+        value: []
+      }
+    },
+
+    _open: function() {
+      Polymer.dom(this.root).querySelector('br-select-box').classList.add('open');
+    }
+
+  });
+</script>
+
+</dom-module>
