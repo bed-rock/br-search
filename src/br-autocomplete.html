@@ -19,8 +19,7 @@
 
   <br-select-box>
 
-    <input type="text" placeholder="Busque por um cliente para visualizar sua carteira">
-
+  <input type="text" placeholder="Busque por um cliente para visualizar sua carteira">
     <!-- <ul class="list">
       <template is="dom-repeat" items="{{options}}">
         <li>
@@ -46,8 +45,9 @@
       }
     },
 
-    _open: function() {
-      Polymer.dom(this.root).querySelector('br-select-box').classList.add('open');
+    _open: function(event) {
+      event.stopPropagation();
+      this.$$('br-select-box').classList.add('open');
     }
 
   });
