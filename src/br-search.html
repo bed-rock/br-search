@@ -1,6 +1,5 @@
 <link rel="import" type="html" href="../../polymer/polymer.html">
 <link rel="import" type="html" href="../../br-select-box/src/br-select-box.html">
-<link rel="import" type="html" href="../../br-icons/src/br-icons.html">
 
 <dom-module id="br-search">
 
@@ -8,22 +7,26 @@
     :host {
       display: flex;
       position: relative;
-      align-items: center;
       width: 100%;
+    }
+    .search--input {
+      padding: 0 1rem;
+      flex-grow: 0;
     }
   </style>
 
 <template>
 
-  <button class="btn__search" onclick="_open(event);">
+  <button class="btn__search" on-click="open">
     <br-icons icon="br-icons:search"></br-icons>
   </button>
 
-  <input type="text" placeholder="Busque por um cliente para visualizar sua carteira">
+  <input type="text" class="input__search" placeholder="Busque por um cliente para visualizar sua carteira">
 
   <br-select-box>
 
-  <input type="text" placeholder="Busque por um cliente para visualizar sua carteira">
+    <input type="text" class="search--input" placeholder="Busque por um cliente para visualizar sua carteira">
+
     <!-- <ul class="list">
       <template is="dom-repeat" items="{{options}}">
         <li>
@@ -31,8 +34,6 @@
         </li>
       </template>
     </ul> -->
-
-    Teste
 
   </br-select-box>
 
@@ -49,9 +50,10 @@
       }
     },
 
-    _open: function(event) {
+    open: function(event) {
       event.stopPropagation();
       this.$$('br-select-box').classList.add('open');
+      this.$$('input').classList.add('visible');
     }
 
   });
