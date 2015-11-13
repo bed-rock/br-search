@@ -2,39 +2,33 @@
 
 <dom-module id="br-search">
 
-  <style>
-    :host {
-      display: flex;
-      position: relative;
-      width: 100%;
-    }
-    .search--input {
-      padding: 0 1rem;
-      flex-grow: 0;
-    }
-  </style>
+<link rel="import" type="css" href="../dist/css/br-search.min.css">
 
 <template>
 
-  <button class="btn__search" on-click="open">
+  <button class="header--btn close_search" on-click="_close">
+    <br-icons icon="br-icons:arrow-back"></br-icons>
+  </button>
+
+  <button class="btn__search" on-click="_open">
     <br-icons icon="br-icons:search"></br-icons>
   </button>
 
-  <input type="text" class="input__search" placeholder="Busque por um cliente para visualizar sua carteira">
+  <input type="text" class="input__search" placeholder="Busque por um cliente para visualizar sua carteira" on-focus="_open">
 
-  <br-select-box>
+  <div class="overlay" on-click="_close"></div>
 
-    <input type="text" class="search--input" placeholder="Busque por um cliente para visualizar sua carteira">
+  <div class="content">
 
-    <!-- <ul class="list">
+    <ul class="list">
       <template is="dom-repeat" items="{{options}}">
         <li>
           <a href="{{item.link}}">{{item.label}}</a>
         </li>
       </template>
-    </ul> -->
+    </ul>
 
-  </br-select-box>
+  </div>
 
 </template>
 
@@ -49,10 +43,19 @@
       }
     },
 
-    open: function(event) {
-      event.stopPropagation();
-      this.$$('br-select-box').classList.add('open');
-      this.$$('input').classList.add('visible');
+    _open: function ( event ) {
+      this.classList.add( 'open' );
+      this.$$( 'input' ).focus();
+      this._toggleSearch();
+    },
+
+    _close: function(event) {
+      this.classList.remove( 'open' );
+      this._toggleSearch();
+    },
+
+    _toggleSearch: function () {
+      document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
     }
 
   });

@@ -1,0 +1,85 @@
+@import '../../bedrock/scss/variables';
+
+:host {
+  display: flex;
+  position: relative;
+  width: 100%;
+
+  .btn__search {
+    display: flex;
+  }
+  @media (min-width: $screen-tablet) {
+    .btn__search {
+      display: none;
+    }
+  }
+
+  .close_search {
+    display: none;
+  }
+
+  input[type="text"] {
+    display: none;
+  }
+  @media (min-width: $screen-tablet) {
+    input[type="text"] {
+      display: flex;
+      margin: 0 1rem;
+    }
+  }
+
+  .overlay {
+    background-color: rgba(0,0,0,.6);
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0;
+    transition: all 400ms ease-out;
+  }
+
+  .content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 999;
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 8px 16px;
+  }
+
+  &.open {
+
+    .btn__search {
+      display: none;
+    }
+
+    input[type="text"] {
+      display: flex;
+    }
+
+    .overlay {
+      z-index: 99;
+      opacity: 1;
+    }
+
+    .content {
+      display: flex;
+    }
+
+    @media (max-width: 768px) {
+      .close_search {
+        display: flex;
+      }
+    }
+
+  }
+
+}
