@@ -1,9 +1,10 @@
 {
   "name": "br-search",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "https://github.com/bed-rock/br-search",
   "authors": [
-    "cbfranca <cleidsonbf@gmail.com>"
+    "cbfranca <cleidsonbf@gmail.com>",
+    "marcelo-ribeiro <marceloribeiromidia@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
@@ -16,6 +17,6 @@
   "dependencies": {
     "bedrock-base": "~1.0.0",
     "br-icons": "~1.0.0",
-    "br-select-box": "~1.0.0"    
+    "br-select-box": "~1.0.0"
   }
 }
