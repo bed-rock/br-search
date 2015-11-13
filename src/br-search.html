@@ -6,25 +6,23 @@
 
 <template>
 
-  <button class="header--btn close_search" on-click="_close">
+  <button class="header--btn close_search" on-click="_toggleSearch">
     <br-icons icon="br-icons:arrow-back"></br-icons>
   </button>
 
-  <button class="btn__search" on-click="_open">
+  <button class="btn__search" on-click="_toggleSearch">
     <br-icons icon="br-icons:search"></br-icons>
   </button>
 
-  <input type="text" class="input__search" placeholder="Busque por um cliente para visualizar sua carteira" on-focus="_open">
+  <input type="text" id="inputSearch" class="input__search" placeholder="Busque por um cliente para visualizar sua carteira" on-keyUp="_onKeyPress">
 
-  <div class="overlay" on-click="_close"></div>
+  <div class="overlay" on-click="_toggleSearch"></div>
 
   <div class="content">
 
     <ul class="list">
-      <template is="dom-repeat" items="{{options}}">
-        <li>
-          <a href="{{item.link}}">{{item.label}}</a>
-        </li>
+      <template is="dom-repeat" id="templateList" items="{{filteredOptions}}">
+        <li data-id$="{{item.id}}" on-click="_selectItem">{{item.name}}</li>
       </template>
     </ul>
 
@@ -40,23 +38,55 @@
       options: {
         type: Array,
         value: []
+      },
+      filteredOptions: {
+        type: Array,
+        readOnly: true,
+        value: []
+      }
+    },
+
+    attached: function () {
+      if ( this.options ) {
+        this._setFilteredOptions( this.options );
+        console.log( this.filteredOptions );
       }
     },
 
     _open: function ( event ) {
-      this.classList.add( 'open' );
       this.$$( 'input' ).focus();
-      this._toggleSearch();
+      this.classList.add( 'open' );
+      document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
     },
 
-    _close: function(event) {
+    _close: function ( event ) {
+      this.$.inputSearch.value = '';
       this.classList.remove( 'open' );
-      this._toggleSearch();
+      document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
     },
 
     _toggleSearch: function () {
+      this.classList.toggle( 'open' );
       document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
-    }
+    },
+
+    _onKeyPress: function ( e ) {
+      this._setFilteredOptions( this._searchItem( this.options, e.target.value ) );
+      this._open();
+    },
+
+    _searchItem: function ( collection, query ) {
+      return collection.filter( function ( element ) {
+        return element.name.toLowerCase().indexOf( query.toLowerCase() ) !== -1;
+      } );
+    },
+
+    _selectItem: function ( e, detail ) {
+      var item = this.$.templateList.itemForElement( e.target );
+      this.fire( 'on-br-search-selected', { item } );
+
+      this._close();
+    },
 
   });
 </script>
