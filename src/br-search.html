@@ -1,22 +1,20 @@
-<link rel="import" type="html" href="../../br-select-box/src/br-select-box.html">
-
 <dom-module id="br-search">
 
 <link rel="import" type="css" href="../dist/css/br-search.min.css">
 
 <template>
 
-  <button class="header--btn close_search" on-click="_toggleSearch">
+  <button class="header--btn close_search" on-click="_close">
     <br-icons icon="br-icons:arrow-back"></br-icons>
   </button>
 
-  <button class="btn__search" on-click="_toggleSearch">
+  <button class="btn__search" on-click="_open">
     <br-icons icon="br-icons:search"></br-icons>
   </button>
 
   <input type="text" id="inputSearch" class="input__search" placeholder="Busque por um cliente para visualizar sua carteira" on-keyUp="_onKeyPress">
 
-  <div class="overlay" on-click="_toggleSearch"></div>
+  <div class="overlay" on-click="_close"></div>
 
   <div class="content">
 
@@ -43,7 +41,8 @@
         type: Array,
         readOnly: true,
         value: []
-      }
+      },
+      minLength: Number
     },
 
     attached: function () {
@@ -65,14 +64,14 @@
       document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
     },
 
-    _toggleSearch: function () {
-      this.classList.toggle( 'open' );
-      document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
-    },
-
     _onKeyPress: function ( e ) {
-      this._setFilteredOptions( this._searchItem( this.options, e.target.value ) );
-      this._open();
+      if ( e.target.value.length >= this.minLength ) {
+        this._setFilteredOptions( this._searchItem( this.options, e.target.value ) );
+        this._open();
+      }
+      else if ( e.target.value.length == 0 ) {
+        this.classList.remove( 'open' );
+      }
     },
 
     _searchItem: function ( collection, query ) {
