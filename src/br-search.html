@@ -123,7 +123,7 @@
 
     _searchItem: function ( collection, query ) {
       return collection.filter( function ( element ) {
-        return element.name.toLowerCase().indexOf( query.toLowerCase() ) !== -1;
+        return element.value.toLowerCase().indexOf( query.toLowerCase() ) !== -1;
       } );
     },
 
