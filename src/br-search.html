@@ -1,8 +1,16 @@
+<link rel="import" href="../../iron-a11y-keys/iron-a11y-keys.html">
+
 <dom-module id="br-search">
 
 <link rel="import" type="css" href="../dist/css/br-search.min.css">
 
 <template>
+
+  <iron-a11y-keys target="{{searchTarget}}" keys="esc" on-keys-pressed="_close"></iron-a11y-keys>
+  <iron-a11y-keys target="{{inputTarget}}" keys="down" on-keys-pressed="_first"></iron-a11y-keys>
+  <iron-a11y-keys target="{{listTarget}}" keys="up" on-keys-pressed="_previous"></iron-a11y-keys>
+  <iron-a11y-keys target="{{listTarget}}" keys="down" on-keys-pressed="_next"></iron-a11y-keys>
+  <iron-a11y-keys target="{{listTarget}}" keys="enter space" on-keys-pressed="_selectItem"></iron-a11y-keys>
 
   <button class="header--btn close_search" on-click="_close">
     <br-icons icon="br-icons:arrow-back"></br-icons>
@@ -18,9 +26,9 @@
 
   <div class="content">
 
-    <ul class="list">
+    <ul id="list" class="list">
       <template is="dom-repeat" id="templateList" items="{{filteredOptions}}">
-        <li data-id$="{{item.id}}" on-click="_selectItem">{{item.name}}</li>
+        <li tabindex="0" data-key$="{{item.id}}" on-click="_selectItem">{{item.name}}</li>
       </template>
     </ul>
 
@@ -33,17 +41,43 @@
     is: 'br-search',
 
     properties: {
+
       options: {
         type: Array,
         value: []
       },
+
       filteredOptions: {
         type: Array,
         readOnly: true,
         value: []
       },
+
       minLength: Number,
-      placeholder: String
+
+      placeholder: String,
+
+      searchTarget: {
+        type: Object,
+        value: function () {
+          return this;
+        }
+      },
+
+      inputTarget: {
+        type: Object,
+        value: function () {
+          return this.$.inputSearch;
+        }
+      },
+
+      listTarget: {
+        type: Object,
+        value: function () {
+          return this.$.list;
+        }
+      }
+
     },
 
     attached: function () {
@@ -53,16 +87,28 @@
       }
     },
 
+    _first: function () {
+      this.$.list.firstElementChild.focus();
+    },
+
+    _previous: function () {
+      this.$$( ':focus' ).previousElementSibling.focus();
+    },
+
+    _next: function () {
+      this.$$( ':focus' ).nextElementSibling.focus();
+    },
+
     _open: function ( event ) {
       this.$$( 'input' ).focus();
       this.classList.add( 'open' );
-      document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
+      document.querySelector( 'br-header' ).classList.add( 'search_opened' );
     },
 
     _close: function ( event ) {
       this.$.inputSearch.value = '';
       this.classList.remove( 'open' );
-      document.querySelector( 'br-header' ).classList.toggle( 'search_opened' );
+      document.querySelector( 'br-header' ).classList.remove( 'search_opened' );
     },
 
     _onKeyPress: function ( e ) {
@@ -81,12 +127,19 @@
       } );
     },
 
-    _selectItem: function ( e, detail ) {
-      var item = this.$.templateList.itemForElement( e.target );
-      this.fire( 'on-br-search-selected', { item } );
+    _selectItem: function ( event, detail ) {
+      var item;
 
+      if ( event.type == 'click' ) {
+        item = this.$.templateList.itemForElement( event.target );
+      }
+      else if ( event.type == 'keys-pressed' ) {
+        item = this.$.templateList.itemForElement( event.detail.keyboardEvent.target );
+      }
+
+      this.fire( 'on-br-search-selected', { item } );
       this._close();
-    },
+    }
 
   });
 </script>
