@@ -20,14 +20,14 @@
     <br-icons icon="br-icons:search"></br-icons>
   </button>
 
-  <input type="text" id="inputSearch" class="input__search" placeholder="{{placeholder}}" on-keyUp="_onKeyPress">
+  <input type="text" id="inputSearch" class="input__search"  value="{{filterVal::input}}" placeholder="{{placeholder}}" on-input="_onInput">
 
   <div class="overlay" on-click="_close"></div>
 
   <div class="content">
 
     <ul id="list" class="list">
-      <template is="dom-repeat" id="templateList" items="{{filteredOptions}}">
+      <template is="dom-repeat" id="templateList" items="{{options}}" filter="{{_filter(filterVal)}}">
         <li tabindex="-1" data-key$="{{item.key}}" on-click="_selectItem">{{item.value}}</li>
       </template>
     </ul>
@@ -47,13 +47,10 @@
         value: []
       },
 
-      filteredOptions: {
-        type: Array,
-        readOnly: true,
-        value: []
+      minLength: {
+        type: Number,
+        value: 1
       },
-
-      minLength: Number,
 
       placeholder: String,
 
@@ -80,13 +77,6 @@
 
     },
 
-    attached: function () {
-      if ( this.options ) {
-        this._setFilteredOptions( this.options );
-        console.log( this.filteredOptions );
-      }
-    },
-
     _first: function () {
       this.$.list.firstElementChild.focus();
     },
@@ -111,20 +101,21 @@
       document.querySelector( 'br-header' ).classList.remove( 'search_opened' );
     },
 
-    _onKeyPress: function ( e ) {
-      if ( e.target.value.length >= this.minLength ) {
-        this._setFilteredOptions( this._searchItem( this.options, e.target.value ) );
+    _onInput: function ( event ) {
+      if ( event.target.value.length >= this.minLength )
         this._open();
-      }
-      else if ( e.target.value.length == 0 ) {
-        this.classList.remove( 'open' );
-      }
+      else if ( event.target.value.length == 0 )
+        this._close();
     },
 
-    _searchItem: function ( collection, query ) {
-      return collection.filter( function ( element ) {
-        return element.value.toLowerCase().indexOf( query.toLowerCase() ) !== -1;
-      } );
+    _filter: function(val) {
+      return function(options) {
+        if (!val)
+          return true;
+        if (!options)
+          return false;
+        return ( options.value && ~options.value.toLowerCase().indexOf( val.toLowerCase() ) );
+      };
     },
 
     _selectItem: function ( event, detail ) {
