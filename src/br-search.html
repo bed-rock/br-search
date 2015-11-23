@@ -27,7 +27,7 @@
   <div class="content">
 
     <ul id="list" class="list">
-      <template is="dom-repeat" id="templateList" items="{{filteredOptions}}" filter="{{_filter(filterVal)}}">
+      <template is="dom-repeat" id="templateList" items="{{options}}" filter="{{_filter(filterVal)}}">
         <li tabindex="-1" data-key$="{{item.key}}" on-click="_selectItem">{{item.value}}</li>
       </template>
     </ul>
