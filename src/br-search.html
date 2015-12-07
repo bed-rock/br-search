@@ -1,142 +1,150 @@
 <link rel="import" href="../../iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../../iron-ajax/iron-ajax.html">
 
 <dom-module id="br-search">
 
-<link rel="import" type="css" href="../dist/css/br-search.min.css">
+  <link rel="import" type="css" href="../dist/css/br-search.min.css">
 
-<template>
+  <template>
 
-  <iron-a11y-keys target="{{searchTarget}}" keys="esc" on-keys-pressed="_close"></iron-a11y-keys>
-  <iron-a11y-keys target="{{inputTarget}}" keys="down" on-keys-pressed="_first"></iron-a11y-keys>
-  <iron-a11y-keys target="{{listTarget}}" keys="up" on-keys-pressed="_previous"></iron-a11y-keys>
-  <iron-a11y-keys target="{{listTarget}}" keys="down" on-keys-pressed="_next"></iron-a11y-keys>
-  <iron-a11y-keys target="{{listTarget}}" keys="enter space" on-keys-pressed="_selectItem"></iron-a11y-keys>
+    <iron-a11y-keys target="{{searchTarget}}" keys="esc" on-keys-pressed="_close"></iron-a11y-keys>
+    <iron-a11y-keys target="{{inputTarget}}" keys="down" on-keys-pressed="_first"></iron-a11y-keys>
+    <iron-a11y-keys target="{{listTarget}}" keys="up" on-keys-pressed="_previous"></iron-a11y-keys>
+    <iron-a11y-keys target="{{listTarget}}" keys="down" on-keys-pressed="_next"></iron-a11y-keys>
+    <iron-a11y-keys target="{{listTarget}}" keys="enter space" on-keys-pressed="_selectItem"></iron-a11y-keys>    
 
-  <button class="header--btn close_search" on-click="_close">
-    <br-icons icon="br-icons:arrow-back"></br-icons>
-  </button>
+    <button class="header--btn close_search" on-click="_close">
+      <br-icons icon="br-icons:arrow-back"></br-icons>
+    </button>
 
-  <button class="btn__search" on-click="_open">
-    <br-icons icon="br-icons:search"></br-icons>
-  </button>
+    <button class="btn__search" on-click="_open">
+      <br-icons icon="br-icons:search"></br-icons>
+    </button>
 
-  <input type="text" id="inputSearch" class="input__search"  value="{{filterVal::input}}" placeholder="{{placeholder}}" on-input="_onInput">
+    <input type="text" id="inputSearch" class="input__search" value="{{filterVal::input}}" placeholder="{{placeholder}}" on-input="_onInput">
 
-  <div class="overlay" on-click="_close"></div>
+    <div class="overlay" on-click="_close"></div>
 
-  <div class="content">
+    <div class="content">
 
-    <ul id="list" class="list">
-      <template is="dom-repeat" id="templateList" items="{{options}}" filter="{{_filter(filterVal)}}">
-        <li tabindex="-1" data-key$="{{item.key}}" on-click="_selectItem">{{item.value}}</li>
-      </template>
-    </ul>
+      <iron-ajax id="searchRequest"
+                 url="{{urlApiRequest}}"
+                 params="{{params}}"
+                 handle-as="json"
+                 last-response="{{ajaxResponse}}"
+                 debounce-duration="300">
+      </iron-ajax>
 
-  </div>
+      <ul id="list" class="list">
+        <template is="dom-repeat" id="templateList" items="[[ajaxResponse.Data]]" filter="{{_filter(filterVal)}}">
+          <li tabindex="-1" data-key$="[[item.key]]" on-click="_selectItem">[[item.value]]</li>
+        </template>
+      </ul>
 
-</template>
+    </div>
 
-<script>
-  Polymer({
-    is: 'br-search',
+  </template>
 
-    properties: {
+  <script>
 
-      options: {
-        type: Array,
-        value: []
-      },
+    Polymer({
+      is: 'br-search',
 
-      minLength: {
-        type: Number,
-        value: 1
-      },
+      properties: {
 
-      placeholder: String,
+        placeholder: String,
 
-      searchTarget: {
-        type: Object,
-        value: function () {
-          return this;
+        minLength: {
+          type: Number,
+          value: 1
+        },
+
+        limit: {
+          type: Number,
+          value: 10
+        },
+
+        searchTarget: {
+          type: Object,
+          value: function () {
+            return this;
+          }
+        },
+
+        inputTarget: {
+          type: Object,
+          value: function () {
+            return this.$.inputSearch;
+          }
+        },
+
+        listTarget: {
+          type: Object,
+          value: function () {
+            return this.$.list;
+          }
         }
+
       },
 
-      inputTarget: {
-        type: Object,
-        value: function () {
-          return this.$.inputSearch;
-        }
+      _first: function () {
+        this.$.list.firstElementChild.focus();
       },
 
-      listTarget: {
-        type: Object,
-        value: function () {
-          return this.$.list;
+      _previous: function () {
+        this.$$(':focus').previousElementSibling.focus();
+      },
+
+      _next: function () {
+        this.$$(':focus').nextElementSibling.focus();
+      },
+
+      _open: function (event) {
+        this.$$('input').focus();
+        this.classList.add('open');
+        document.querySelector('br-header').classList.add('search_opened');
+      },
+
+      _close: function (event) {
+        this.$.inputSearch.value = '';
+        this.classList.remove('open');
+        document.querySelector('br-header').classList.remove('search_opened');
+      },
+
+      _onInput: function (event) {
+        if (event.target.value.length >= this.minLength) {
+          this.params = { query: event.target.value, limit: this.limit };
+          this.$.searchRequest.generateRequest();
+          this._open();
         }
-      }
+        else if (event.target.value.length == 0)
+          this._close();
+      },
 
-    },
+      _filter: function (val) {
+        return function (items) {
+          if (!val)
+            return true;
+          if (!items)
+            return false;
+          return (items.value && ~items.value.toLowerCase().indexOf(val.toLowerCase()));
+        };
+      },
 
-    _first: function () {
-      this.$.list.firstElementChild.focus();
-    },
+      _selectItem: function (event, detail) {
+        var item;
 
-    _previous: function () {
-      this.$$( ':focus' ).previousElementSibling.focus();
-    },
+        if (event.type == 'click') {
+          item = this.$.templateList.itemForElement(event.target);          
+        }
+        else if (event.type == 'keys-pressed') {
+          item = this.$.templateList.itemForElement(event.detail.keyboardEvent.target);
+        }
 
-    _next: function () {
-      this.$$( ':focus' ).nextElementSibling.focus();
-    },
-
-    _open: function ( event ) {
-      this.$$( 'input' ).focus();
-      this.classList.add( 'open' );
-      document.querySelector( 'br-header' ).classList.add( 'search_opened' );
-    },
-
-    _close: function ( event ) {
-      this.$.inputSearch.value = '';
-      this.classList.remove( 'open' );
-      document.querySelector( 'br-header' ).classList.remove( 'search_opened' );
-    },
-
-    _onInput: function ( event ) {
-      if ( event.target.value.length >= this.minLength )
-        this._open();
-      else if ( event.target.value.length == 0 )
+        this.fire('on-br-search-selected', { item });
         this._close();
-    },
-
-    _filter: function(val) {
-      return function(options) {
-        if (!val)
-          return true;
-        if (!options)
-          return false;
-        return ( options.value && ~options.value.toLowerCase().indexOf( val.toLowerCase() ) );
-      };
-    },
-
-    _selectItem: function ( event, detail ) {
-      var item;
-
-      if ( event.type == 'click' ) {
-        item = this.$.templateList.itemForElement( event.target );
-      }
-      else if ( event.type == 'keys-pressed' ) {
-        item = this.$.templateList.itemForElement( event.detail.keyboardEvent.target );
       }
 
-      this.fire( 'on-br-search-selected', { item } );
-      this._close();
-    },
-
-    setOptions: function (options) {
-        this.options = options;
-    }
-
-  });
-</script>
-
+    });
+  </script>
 </dom-module>
