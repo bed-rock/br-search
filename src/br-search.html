@@ -133,7 +133,6 @@
         if ( event.target.value.length >= this.minLength ) {
           this.params = { query: event.target.value, limit: this.limit };
           this.$.searchRequest.generateRequest();
-          this.loading = this.$.searchRequest.loading;
           this._open();
         }
         else if ( event.target.value.length == 0 ) {
