@@ -11,7 +11,7 @@
     <iron-a11y-keys target="{{inputTarget}}" keys="down" on-keys-pressed="_first"></iron-a11y-keys>
     <iron-a11y-keys target="{{listTarget}}" keys="up" on-keys-pressed="_previous"></iron-a11y-keys>
     <iron-a11y-keys target="{{listTarget}}" keys="down" on-keys-pressed="_next"></iron-a11y-keys>
-    <iron-a11y-keys target="{{listTarget}}" keys="enter space" on-keys-pressed="_selectItem"></iron-a11y-keys>    
+    <iron-a11y-keys target="{{listTarget}}" keys="enter space" on-keys-pressed="_itemSelected"></iron-a11y-keys>
 
     <button class="header--btn close_search" on-click="_close">
       <br-icons icon="br-icons:arrow-back"></br-icons>
@@ -21,7 +21,16 @@
       <br-icons icon="br-icons:search"></br-icons>
     </button>
 
-    <input type="text" id="inputSearch" class="input__search" value="{{filterVal::input}}" placeholder="{{placeholder}}" on-input="_onInput">
+    <template is="dom-if" if="{{loading}}">
+      <br-icons icon="br-icons:loading" class="icon__spin"></br-icons>
+    </template>
+
+    <input type="text"
+           id="inputSearch"
+           class="input__search"
+           value="{{searchString::input}}"
+           placeholder="{{placeholder}}"
+           on-input="_onInput">
 
     <div class="overlay" on-click="_close"></div>
 
@@ -32,13 +41,22 @@
                  params="{{params}}"
                  handle-as="json"
                  last-response="{{ajaxResponse}}"
-                 debounce-duration="300">
-      </iron-ajax>
+                 debounce-duration="300"
+                 loading></iron-ajax>
 
       <ul id="list" class="list">
-        <template is="dom-repeat" id="templateList" items="[[ajaxResponse.Data]]" filter="{{_filter(filterVal)}}">
-          <li tabindex="-1" data-key$="[[item.key]]" on-click="_selectItem">[[item.value]]</li>
+
+        <template is="dom-repeat"
+                  id="templateList"
+                  items="[[ajaxResponse.Data]]"
+                  filter="{{_computefilter(searchString)}}">
+
+          <li tabindex="-1"
+              data-key$="[[item.key]]"
+              on-click="_itemSelected">[[item.value]]</li>
+
         </template>
+
       </ul>
 
     </div>
@@ -111,37 +129,47 @@
         document.querySelector('br-header').classList.remove('search_opened');
       },
 
-      _onInput: function (event) {
-        if (event.target.value.length >= this.minLength) {
+      _onInput: function ( event ) {
+        if ( event.target.value.length >= this.minLength ) {
           this.params = { query: event.target.value, limit: this.limit };
           this.$.searchRequest.generateRequest();
+          this.loading = this.$.searchRequest.loading;
           this._open();
         }
-        else if (event.target.value.length == 0)
+        else if ( event.target.value.length == 0 ) {
           this._close();
+        }
       },
 
-      _filter: function (val) {
-        return function (items) {
-          if (!val)
-            return true;
-          if (!items)
-            return false;
-          return (items.value && ~items.value.toLowerCase().indexOf(val.toLowerCase()));
-        };
+      _computefilter: function ( string ) {
+        if ( !string ) {
+          return null;
+        }
+        else {
+          string = string.toLowerCase();
+          return function ( items ) {
+            var value = items.value.toLowerCase(),
+                key = items.key;
+            return (
+              value.indexOf( string ) != -1 ||
+              key.indexOf( string ) != -1
+            );
+          };
+        }
       },
 
-      _selectItem: function (event, detail) {
+      _itemSelected: function ( e ) {
         var item;
 
-        if (event.type == 'click') {
-          item = this.$.templateList.itemForElement(event.target);          
+        if ( event.type == 'click' ) {
+          item = this.$.templateList.itemForElement( event.target );
         }
-        else if (event.type == 'keys-pressed') {
-          item = this.$.templateList.itemForElement(event.detail.keyboardEvent.target);
+        else if ( event.type == 'keys-pressed' ) {
+          item = this.$.templateList.itemForElement( event.detail.keyboardEvent.target );
         }
 
-        this.fire('on-br-search-selected', { item });
+        this.fire( 'on-br-search-selected', { item: item } );
+
         this._close();
       }
 
