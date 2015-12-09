@@ -25,6 +25,8 @@
       <br-icons icon="br-icons:loading" class="icon__spin"></br-icons>
     </template>
 
+    <array-selector id="selector" items="[[ajaxResponse.Data]]" selected="{{selected}}"></array-selector>
+
     <input type="text"
            id="inputSearch"
            class="input__search"
@@ -53,7 +55,8 @@
 
           <li tabindex="-1"
               data-key$="[[item.key]]"
-              on-click="_itemSelected">[[item.value]]</li>
+              on-click="_itemSelected"
+              on-focus="_itemFocused">[[item.value]]</li>
 
         </template>
 
@@ -158,14 +161,28 @@
         }
       },
 
+      _selectItem: function ( item ) {
+        //e.target.classList.add( 'is_selected' );
+        var item = this.$.templateList.itemForElement( item );
+        this.$.selector.select( item );
+        return item;
+      },
+
+      _itemFocused: function ( e ) {
+        this.$.inputSearch.value = e.target.innerText;
+        //this.$.inputSearch.focus();
+
+        this._selectItem( e.target );
+      },
+
       _itemSelected: function ( e ) {
         var item;
 
         if ( event.type == 'click' ) {
-          item = this.$.templateList.itemForElement( event.target );
+          item = this._selectItem( e.target );
         }
         else if ( event.type == 'keys-pressed' ) {
-          item = this.$.templateList.itemForElement( event.detail.keyboardEvent.target );
+          item = this._selectItem( e.detail.keyboardEvent.target );
         }
 
         this.fire( 'on-br-search-selected', { item: item } );
