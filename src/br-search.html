@@ -32,11 +32,11 @@
 		<div class="content">
 
 			<iron-ajax id="searchRequest" url="{{urlApiRequest}}" params="{{params}}" handle-as="json" last-response="{{ajaxResponse}}"
-				debounce-duration="300" loading={{loading}}></iron-ajax>
+				debounce-duration="300" loading={{loading}} on-response="_handleResponse"></iron-ajax>
 
 			<ul id="list" class="list">
 
-				<template is="dom-repeat" id="templateList" items="{{ ajaxResponse.Data }}" filter="{{_computefilter(searchString)}}">
+				<template is="dom-repeat" id="templateList" items="{{ ajaxResponse.Data }}">
 
 					<li tabindex="-1" data-key$="[[item.key]]" on-click="_itemSelected">[[item.value]]</li>
 
@@ -86,6 +86,11 @@
           value: function () {
             return this.$.list;
           }
+        },
+
+        notFoundMessage: {
+          type: String,
+          value: "We didn't found anything for you here! =(";
         }
 
       },
@@ -123,26 +128,7 @@
         else if ( event.target.value.length == 0 ) {
           this._close();
         }
-      },
-
-      _computefilter: function ( string ) {
-
-        var filteredItems = []; 
-
-        return function(obj) {
-
-          if (!val) return true;
-          if (!obj) return false;
-
-          if(obj.value && ~obj.value.indexOf(val))
-           filteredItems.push(obj)
-
-           return filteredItems;
-          
-        };
-
-      
-      },
+      },   
 
       _itemSelected: function ( event ) {
         var item;
@@ -157,7 +143,14 @@
         this.fire( 'on-br-search-selected', { item: item } );
 
         this._close();
+      },
+
+      _handleResponse: function (event) {
+
+        if(this.ajaxResponse && this.ajaxResponse.Data.length == 0)
+          this.push('ajaxResponse.Data', {key: "-1", value: this.notFoundMessage});
       }
+
 
     });
   </script>
