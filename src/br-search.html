@@ -3,67 +3,52 @@
 
 <dom-module id="br-search">
 
-  <link rel="import" type="css" href="../dist/css/br-search.min.css">
+	<link rel="import" type="css" href="../dist/css/br-search.min.css">
 
-  <template>
+	<template>
 
-    <iron-a11y-keys target="{{searchTarget}}" keys="esc" on-keys-pressed="_close"></iron-a11y-keys>
-    <iron-a11y-keys target="{{inputTarget}}" keys="down" on-keys-pressed="_first"></iron-a11y-keys>
-    <iron-a11y-keys target="{{listTarget}}" keys="up" on-keys-pressed="_previous"></iron-a11y-keys>
-    <iron-a11y-keys target="{{listTarget}}" keys="down" on-keys-pressed="_next"></iron-a11y-keys>
-    <iron-a11y-keys target="{{listTarget}}" keys="enter space" on-keys-pressed="_itemSelected"></iron-a11y-keys>
+		<iron-a11y-keys target="{{searchTarget}}" keys="esc" on-keys-pressed="_close"></iron-a11y-keys>
+		<iron-a11y-keys target="{{inputTarget}}" keys="down" on-keys-pressed="_first"></iron-a11y-keys>
+		<iron-a11y-keys target="{{listTarget}}" keys="up" on-keys-pressed="_previous"></iron-a11y-keys>
+		<iron-a11y-keys target="{{listTarget}}" keys="down" on-keys-pressed="_next"></iron-a11y-keys>
+		<iron-a11y-keys target="{{listTarget}}" keys="enter space" on-keys-pressed="_itemSelected"></iron-a11y-keys>
 
-    <button class="header--btn close_search" on-click="_close">
+		<button class="header--btn close_search" on-click="_close">
       <br-icons icon="br-icons:arrow-back"></br-icons>
     </button>
 
-    <button class="btn__search" on-click="_open">
+		<button class="btn__search" on-click="_open">
       <br-icons icon="br-icons:search"></br-icons>
     </button>
 
-    <template is="dom-if" if="{{loading}}">
-      <br-icons icon="br-icons:loading" class="icon__spin"></br-icons>
-    </template>
+		<template is="dom-if" if="{{loading}}">
+			<br-icons icon="br-icons:loading" class="icon__spin"></br-icons>
+		</template>
 
-    <input type="text"
-           id="inputSearch"
-           class="input__search"
-           value="{{searchString::input}}"
-           placeholder="{{placeholder}}"
-           on-input="_onInput">
+		<input type="text" id="inputSearch" class="input__search" value="{{searchString::input}}" placeholder="{{placeholder}}" on-input="_onInput">
 
-    <div class="overlay" on-click="_close"></div>
+		<div class="overlay" on-click="_close"></div>
 
-    <div class="content">
+		<div class="content">
 
-      <iron-ajax id="searchRequest"
-                 url="{{urlApiRequest}}"
-                 params="{{params}}"
-                 handle-as="json"
-                 last-response="{{ajaxResponse}}"
-                 debounce-duration="300"
-                 loading={{loading}}></iron-ajax>
+			<iron-ajax id="searchRequest" url="{{urlApiRequest}}" params="{{params}}" handle-as="json" last-response="{{ajaxResponse}}"
+				debounce-duration="300" loading={{loading}}></iron-ajax>
 
-      <ul id="list" class="list">
+			<ul id="list" class="list">
 
-        <template is="dom-repeat"
-                  id="templateList"
-                  items="[[ajaxResponse.Data]]"
-                  filter="{{_computefilter(searchString)}}">
+				<template is="dom-repeat" id="templateList" items="{{ ajaxResponse.Data }}" filter="{{_computefilter(searchString)}}">
 
-          <li tabindex="-1"
-              data-key$="[[item.key]]"
-              on-click="_itemSelected">[[item.value]]</li>
+					<li tabindex="-1" data-key$="[[item.key]]" on-click="_itemSelected">[[item.value]]</li>
 
-        </template>
+				</template>
 
-      </ul>
+			</ul>
 
-    </div>
+		</div>
 
-  </template>
+	</template>
 
-  <script>
+	<script>
 
     Polymer({
       is: 'br-search',
@@ -141,20 +126,22 @@
       },
 
       _computefilter: function ( string ) {
-        if ( !string ) {
-          return null;
-        }
-        else {
-          string = string.toLowerCase();
-          return function ( items ) {
-            var value = items.value.toLowerCase(),
-                key = items.key;
-            return (
-              value.indexOf( string ) != -1 ||
-              key.indexOf( string ) != -1
-            );
-          };
-        }
+
+        var filteredItems = []; 
+
+        return function(obj) {
+
+          if (!val) return true;
+          if (!obj) return false;
+
+          if(obj.value && ~obj.value.indexOf(val))
+           filteredItems.push(obj)
+
+           return filteredItems;
+          
+        };
+
+      
       },
 
       _itemSelected: function ( event ) {
