@@ -1,6 +1,6 @@
 {
   "name": "br-search",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "homepage": "https://github.com/bed-rock/br-search",
   "authors": [
     "cbfranca <cleidsonbf@gmail.com>",
@@ -15,9 +15,9 @@
     "tests"
   ],
   "dependencies": {
-    "bedrock-base": "~1.0.0",
+    "bedrock-base": "latest",
     "br-icons": "~1.0.0",
-    "br-select-box": "~1.0.0",
+    "br-select-box": "latest",
     "iron-a11y-keys": "PolymerElements/iron-a11y-keys#~1.0.3"
   }
 }
